@@ -48,11 +48,7 @@ after_initialize do
     rescue_from('StandardError') { |e| render_json_error e.message, status: 422 }
 
     def index
-      if current_user.blank?
-        respond_with_forbidden
-      else
-        respond_with Babble::Topic.available_topics_for(current_user), serializer: BasicTopicSerializer
-      end
+      respond_with Babble::Topic.available_topics_for(current_user), serializer: BasicTopicSerializer
     end
 
     def show
