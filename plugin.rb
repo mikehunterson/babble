@@ -42,11 +42,17 @@ after_initialize do
   require_dependency "application_controller"
   class ::Babble::TopicsController < ::ApplicationController
     requires_plugin BABBLE_PLUGIN_NAME
+    before_filter :ensure_logged_in
     before_filter :set_default_id, only: :default
 
+    rescue_from('StandardError') { |e| render_json_error e.message, status: 422 }
 
     def index
-      respond_with Babble::Topic.available_topics_for(current_user), serializer: BasicTopicSerializer
+      if current_user.blank?
+        respond_with_forbidden
+      else
+        respond_with Babble::Topic.available_topics_for(current_user), serializer: BasicTopicSerializer
+      end
     end
 
     def show
